@@ -1,0 +1,4 @@
+apiVersion: v2
+name: my-namespace
+description: A Helm chart to create a Kubernetes namespace
+version: 0.1.0
