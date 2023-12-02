@@ -1,0 +1,21 @@
+name: App Workflow
+
+on:
+  workflow_run:
+    workflows: ["Infra Workflow"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  deploy-app:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Display App
+      run: |
+        echo "Deploying Infra"
+        sleep 10
