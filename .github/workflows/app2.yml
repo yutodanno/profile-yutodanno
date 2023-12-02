@@ -1,0 +1,32 @@
+name: App2 Workflow
+
+on:
+  workflow_run:
+    workflows: ["Infra Workflow"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  deploy-app:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Check for changes in specific paths
+      id: check_changes
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ] || git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qE  "infra/"; then
+          echo "変更が検出されました、またはworkflow_dispatchイベントがトリガーされました。"
+          echo "run-deploy-step=true" >> $GITHUB_ENV
+        else
+          echo "run-deploy-step=false" >> $GITHUB_ENV
+        fi
+
+    - name: Display App
+      if: env.run-deploy-step == 'true'
+      run: |
+        echo "Deploying Infra"
+        sleep 30
