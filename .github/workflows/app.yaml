@@ -1,11 +1,13 @@
 name: app
 
+
 on:
-  push:
+  pull_request:
     branches:
       - main
+    types: [opened, synchronize, reopened]
     paths:
-      - 'app/**'
+     - 'app/**'
 
 jobs:
   app:
@@ -18,13 +20,26 @@ jobs:
         id: check_terraform_changes
         run: |
           if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q 'terraform/'; then
+            echo "Terraform changes detected."
             echo "terraform-changed=true" >> $GITHUB_ENV
           else
+            echo "No Terraform changes detected."
             echo "terraform-changed=false" >> $GITHUB_ENV
+          fi
 
       - name: Run infra steps if 'terraform/**' changes
         if: env.terraform-changed == 'true'
-        run: echo "Running infra steps"
+        run: |
+          echo "Running infra steps..."
+          # ここにインフラ関連のスクリプトを追加
+
+      - name: Run some infra steps
+        run: |
+          echo "Starting infra steps"
+          sleep 30
+          echo "Completed infra steps" # インフラ関連のステップが30秒間実行された後に完了
 
       - name: Run app steps
-        run: echo "Running app steps"
+        run: |
+          echo "Running app steps..."
+          # ここにアプリケーション関連のスクリプトを追加
