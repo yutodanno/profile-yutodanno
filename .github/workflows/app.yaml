@@ -1,13 +1,16 @@
 name: app
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/**'
   workflow_run:
     workflows: ["infra"]
     branches: [main]
-    types: 
+    types:
       - completed
-    paths:
-      - 'app/**'
 
 jobs:
   app:
