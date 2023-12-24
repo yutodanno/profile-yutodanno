@@ -6,12 +6,6 @@ on:
       - main
     paths:
       - 'app/**'
-  repository_dispatch:
-    types: [infra-completed]
-  workflow_run:
-    workflows: ["infra"]
-    types: [completed]
-    branches: [main]
 
 jobs:
   app:
@@ -19,5 +13,18 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Run app workflow steps
-        run: echo "Executing app workflow"
+
+      - name: Check for 'terraform/**' changes
+        id: check_terraform_changes
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q 'terraform/'; then
+            echo "terraform-changed=true" >> $GITHUB_ENV
+          else
+            echo "terraform-changed=false" >> $GITHUB_ENV
+
+      - name: Run infra steps if 'terraform/**' changes
+        if: env.terraform-changed == 'true'
+        run: echo "Running infra steps"
+
+      - name: Run app steps
+        run: echo "Running app steps"
