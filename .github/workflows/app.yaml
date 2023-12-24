@@ -8,6 +8,10 @@ on:
       - 'app/**'
   repository_dispatch:
     types: [infra-completed]
+  workflow_run:
+    workflows: ["infra"]
+    types: [completed]
+    branches: [main]
 
 jobs:
   app:
