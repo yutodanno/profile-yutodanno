@@ -34,6 +34,7 @@ jobs:
           # ここにインフラ関連のスクリプトを追加
 
       - name: Run some infra steps
+        if: env.terraform-changed == 'true'
         run: |
           echo "Starting infra steps"
           sleep 30
