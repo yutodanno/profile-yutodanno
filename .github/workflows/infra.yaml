@@ -6,35 +6,40 @@ on:
       - main
     paths:
       - 'terraform/**'
-  workflow_dispatch:
 
 jobs:
   infra:
     runs-on: ubuntu-latest
+    outputs:
+      app-changed: ${{ steps.check_app_changes.outputs.app-changed }} # このジョブの出力として、'app/**' パスの変更があったかどうかの結果を設定しています
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2 
 
       - name: Check for 'app/**' changes
         id: check_app_changes
         run: |
-          if git diff --name-only HEAD^ HEAD | grep 'app/'; then
-            echo "app_changes=true" >> $GITHUB_ENV
-          else
-            echo "app_changes=false" >> $GITHUB_ENV
-          fi
+          # 'app/**' パスに変更があるかどうかをチェックし、結果を環境変数に設定
+          echo "app-changed=$(git diff --name-only HEAD^ HEAD | grep -q 'app/' && echo 'true' || echo 'false')" >> $GITHUB_ENV
+          echo "::set-output name=app-changed::$app_changed" # ステップの出力として 'app-changed' を設定
 
-      # その他のステップ...
+      - name: Run some infra steps
+        run: |
+          echo "Starting infra steps"
+          sleep 30
+          echo "Completed infra steps" # インフラ関連のステップが30秒間実行された後に完了
 
-      - name: Trigger 'app' workflow if 'app/**' changes are detected
-        if: env.app_changes == 'true'
+      - name: Dispatch event to trigger app workflow
+        if: env.app-changed == 'true' # 'app/**' パスに変更がある場合のみ次のステップを実行
         uses: actions/github-script@v5
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }} # GitHub API との認証に使用するトークン
           script: |
+            # 'infra-completed' イベントタイプで repository_dispatch イベントを発行
             github.rest.repos.createDispatchEvent({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              event_type: 'trigger-app-workflow',
+              event_type: 'infra-completed',
               client_payload: { }
             });
