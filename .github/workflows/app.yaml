@@ -1,0 +1,21 @@
+name: app
+
+on:
+  workflow_run:
+    workflows: ["infra"]
+    branches: [main]
+    types: 
+      - completed
+    paths:
+      - 'app/**'
+
+jobs:
+  app:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Run echo
+      run: echo "Hello, APP"
