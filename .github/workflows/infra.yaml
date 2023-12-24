@@ -11,10 +11,30 @@ on:
 jobs:
   infra:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Run echo
-      run: echo "Hello, infra"
+      - name: Check for 'app/**' changes
+        id: check_app_changes
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep 'app/'; then
+            echo "app_changes=true" >> $GITHUB_ENV
+          else
+            echo "app_changes=false" >> $GITHUB_ENV
+          fi
+
+      # その他のステップ...
+
+      - name: Trigger 'app' workflow if 'app/**' changes are detected
+        if: env.app_changes == 'true'
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              event_type: 'trigger-app-workflow',
+              client_payload: { }
+            });

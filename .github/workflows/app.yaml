@@ -6,19 +6,15 @@ on:
       - main
     paths:
       - 'app/**'
-  workflow_run:
-    workflows: ["infra"]
-    branches: [main]
-    types:
-      - completed
+  repository_dispatch:
+    types: [trigger-app-workflow]
 
 jobs:
   app:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Run echo
-      run: echo "Hello, APP"
+      - name: Run echo
+        run: echo "Hello, APP"
