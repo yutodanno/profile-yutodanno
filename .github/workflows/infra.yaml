@@ -1,11 +1,11 @@
 name: infra
 on:
-  push:
+  pull_request:
     branches:
       - main
+    types: [opened, synchronize, reopened]
     paths:
-     - 'terraform/**'
-  workflow_dispatch:
+      - 'terraform/**'
 
 jobs:
   example-job:
@@ -29,6 +29,7 @@ jobs:
           else
             echo "変更が検出されませんでした。"
             echo "::set-output name=run-job::false"
+          fi  # この行を追加
           
   job2:
     needs: example-job
