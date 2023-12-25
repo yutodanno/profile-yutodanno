@@ -38,3 +38,11 @@ jobs:
     steps:
       - name: Echo app
         run: echo "app"
+
+  job3:
+    needs: job2
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Echo app
+        run: echo "app"
