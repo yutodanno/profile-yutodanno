@@ -5,6 +5,7 @@ on:
       - main
     paths:
      - 'terraform/**'
+  workflow_dispatch:
 
 jobs:
   example-job:
