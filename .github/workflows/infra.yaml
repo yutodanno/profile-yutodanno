@@ -1,9 +1,8 @@
 name: infra
 on:
-  pull_request:
+  push:
     branches:
       - main
-    types: [opened, synchronize, reopened]
     paths:
      - 'terraform/**'
 
