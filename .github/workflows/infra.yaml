@@ -15,7 +15,9 @@ jobs:
 
       - name: Check for changes in non-excluded paths
         run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -Ev 'terraform/apim/(a|b|c|d|e)/' > /dev/null; then
+          echo "Changes between ${{ github.event.before }} and ${{ github.sha }}"
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }}
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -Ev 'terraform/apim/(a|b|c|d|e)/'; then
             echo "Non-excluded paths changed."
             echo "run-job=true" >> $GITHUB_ENV
           else
@@ -28,4 +30,3 @@ jobs:
         run: |
           echo "Running tasks based on changes in non-excluded paths"
           # ここに実行するスクリプトを追加
-
