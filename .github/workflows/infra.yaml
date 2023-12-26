@@ -47,6 +47,7 @@ jobs:
             echo "変更が検出されませんでした。"
             echo "run-job=false" >> $GITHUB_ENV
           fi
-      - name: Echo app
+
+      - name:  Echo app
         if: env.run-job == 'true'
         run: echo "app"
