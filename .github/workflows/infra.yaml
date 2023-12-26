@@ -8,10 +8,8 @@ on:
       - 'terraform/**'
 
 jobs:
-  example-job:
+  infra-job:
     runs-on: ubuntu-latest
-    outputs:
-      run-job: ${{ steps.check-change.outputs.run-job }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -19,30 +17,36 @@ jobs:
           fetch-depth: 0 
 
       - name: Check for changes in non-excluded paths
-        id: check-change
         run: |
           echo "Changes between ${{ github.event.before }} and ${{ github.sha }}"
           git diff --name-only ${{ github.event.before }} ${{ github.sha }}
           if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qE '^terraform/apim/(a|b|c|d|e)/' > /dev/null; then
             echo "変更が検出されました。"
-            echo "::set-output name=run-job::true"
+            echo "run-job=true" >> $GITHUB_ENV
           else
             echo "変更が検出されませんでした。"
-            echo "::set-output name=run-job::false"
-          fi  # この行を追加
-          
-  job2:
-    needs: example-job
-    runs-on: ubuntu-latest
-    if: needs.example-job.outputs.run-job == 'true'
-    steps:
-      - name: Echo app
-        run: echo "app"
+            echo "run-job=false" >> $GITHUB_ENV
+          fi
 
-  job3:
-    needs: job2
+      - name:  Echo app
+        if: env.run-job == 'true'
+        run: echo "infra"
+          
+  app-job:
+    needs: infra-job
     runs-on: ubuntu-latest
-    if: always()
     steps:
+      - name: Check for changes in non-excluded paths
+        run: |
+          echo "Changes between ${{ github.event.before }} and ${{ github.sha }}"
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }}
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qE '^terraform/apim/(a|b|c|d|e)/' > /dev/null; then
+            echo "変更が検出されました。"
+            echo "run-job=true" >> $GITHUB_ENV
+          else
+            echo "変更が検出されませんでした。"
+            echo "run-job=false" >> $GITHUB_ENV
+          fi
       - name: Echo app
+        if: env.run-job == 'true'
         run: echo "app"
