@@ -36,6 +36,10 @@ jobs:
     needs: infra-job
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0     
       - name: Check for changes in non-excluded paths
         run: |
           echo "Changes between ${{ github.event.before }} and ${{ github.sha }}"
