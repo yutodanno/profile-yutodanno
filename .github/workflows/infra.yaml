@@ -31,20 +31,12 @@ jobs:
       - name:  Echo app
         if: env.run-job == 'true'
         run: echo "infra"
-          
-  app-job:
-    needs: infra-job
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0     
+
       - name: Check for changes in non-excluded paths
         run: |
           echo "Changes between ${{ github.event.before }} and ${{ github.sha }}"
           git diff --name-only ${{ github.event.before }} ${{ github.sha }}
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qE '^terraform/apim/(a|b|c|d|e)/' > /dev/null; then
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qE '^terraform/' > /dev/null; then
             echo "変更が検出されました。"
             echo "run-job=true" >> $GITHUB_ENV
           else
@@ -54,4 +46,4 @@ jobs:
 
       - name:  Echo app
         if: env.run-job == 'true'
-        run: echo "app"
+        run: echo "app"           
