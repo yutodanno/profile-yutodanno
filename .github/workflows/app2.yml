@@ -49,13 +49,3 @@ jobs:
         if: env.CHANGES_DETECTED == 'true'
         run: |
           echo "Deploying Infra"
-
-      - name: Display App
-        if: env.run-deploy-step == 'true'
-        run: |
-          echo "Deploying Infra"
-
-      - name: Display App
-        if: env.run-deploy-step == 'true'
-        run: |
-          echo "Deploying Infra"

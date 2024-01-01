@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'infra/**'
-      - 'app/**'
+      - 'app/**'f
   workflow_dispatch:
 
 jobs:
