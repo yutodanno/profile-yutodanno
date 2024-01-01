@@ -10,19 +10,43 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-infra:
+  deploy-app:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-      - name: Display Infra
+      - name: Determine if workflow should run
+        id: should_run
+        run: |
+          # 'workflow_dispatch'イベントか'Infra Workflow'が成功した場合にのみ実行
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ github.event.workflow_run.conclusion }}" = "success" ]; then
+            echo "Workflow should run."
+            echo "SHOULD_RUN=true" >> $GITHUB_ENV
+          else
+            echo "Workflow should not run."
+            echo "SHOULD_RUN=false" >> $GITHUB_ENV
+          fi
+
+      - name: Check for changes in 'infra/' path
+        if: env.SHOULD_RUN == 'true'
+        run: |
+          # mainブランチの直前のコミットと現在のコミットの間で変更をチェック
+          MAIN_BEFORE_LAST_COMMIT=$(git rev-parse origin/main^)
+          CURRENT_COMMIT=$(git rev-parse HEAD)
+
+          if git diff --name-only $MAIN_BEFORE_LAST_COMMIT $CURRENT_COMMIT | grep -qE 'infra/'; then
+            echo "Changes detected in 'infra/' path."
+            echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
+          else
+            echo "No changes detected in 'infra/' path."
+            echo "CHANGES_DETECTED=false" >> $GITHUB_ENV
+          fi
+
+      - name: Deploy App
+        if: env.CHANGES_DETECTED == 'true'
         run: |
           echo "Deploying Infra"
-          sleep 10
-
-      - name: Fail this step
-        run: |
-          echo "Failing this step intentionally"
-          exit 1
