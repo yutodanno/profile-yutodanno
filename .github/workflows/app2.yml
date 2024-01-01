@@ -5,9 +5,8 @@ on:
     workflows: ["Infra Workflow"]
     types:
       - completed
-    paths:
-      - 'infra/**'
   workflow_dispatch:
+
 
 jobs:
   deploy-app:
@@ -20,26 +19,36 @@ jobs:
           fetch-depth: 0
 
       - name: Check for changes in specific paths
-        id: check_changes
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "workflow_dispatch event triggered."
             echo "run-deploy-step=true" >> $GITHUB_ENV
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qE 'infra/'; then
-              echo "Changes detected."
+          else
+            # mainブランチの直前のコミットを取得
+            MAIN_BEFORE_LAST_COMMIT=$(git rev-parse origin/main^)
+
+            # 現在のワークフローでのHEADコミットを取得
+            CURRENT_COMMIT=$(git rev-parse HEAD)
+
+            echo "Main branch before last commit: $MAIN_BEFORE_LAST_COMMIT"
+            echo "Current commit: $CURRENT_COMMIT"
+
+            # mainブランチの直前のコミットと現在のコミットの間で変更をチェック
+            if git diff --name-only $MAIN_BEFORE_LAST_COMMIT $CURRENT_COMMIT | grep -qE 'infra/'; then
+              echo "Changes detected in 'infra/' path."
               echo "run-deploy-step=true" >> $GITHUB_ENV
             else
-              echo "No changes detected."
+              echo "No changes detected in 'infra/' path."
               echo "run-deploy-step=false" >> $GITHUB_ENV
             fi
-          else
-            echo "No applicable event."
-            echo "run-deploy-step=false" >> $GITHUB_ENV
           fi
 
       - name: Display App
         if: env.run-deploy-step == 'true'
         run: |
           echo "Deploying Infra"
-          sleep 30
+
+      - name: Display App
+        if: env.run-deploy-step == 'true'
+        run: |
+          echo "Deploying Infra"
