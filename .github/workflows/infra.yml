@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'infra/**'
-      - 'app/**'f
+      - 'app/**'
   workflow_dispatch:
 
 jobs:
@@ -14,10 +14,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Display Infra
-      run: |
-        echo "Deploying Infra"
-        sleep 10
+      - name: Display Infra
+        run: |
+          echo "Deploying Infra"
+          sleep 10
+
+      - name: Fail this step
+        run: |
+          echo "Failing this step intentionally"
+          exit 1
