@@ -25,14 +25,12 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "workflow_dispatch event triggered."
             echo "run-deploy-step=true" >> $GITHUB_ENV
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qE 'infra/'; then
+          elif git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -qE 'infra/'; then
               echo "Changes detected."
               echo "run-deploy-step=true" >> $GITHUB_ENV
             else
               echo "No changes detected."
               echo "run-deploy-step=false" >> $GITHUB_ENV
-            fi
           else
             echo "No applicable event."
             echo "run-deploy-step=false" >> $GITHUB_ENV
