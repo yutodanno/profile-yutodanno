@@ -37,3 +37,8 @@ jobs:
         if: env.CHANGES_DETECTED == 'true'
         run: |
           echo "Deploying Infra"
+
+      - name: Fail this step
+        run: |
+          echo "Failing this step intentionally"
+          exit 1
