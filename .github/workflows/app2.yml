@@ -23,18 +23,17 @@ jobs:
         run: |
           # 'workflow_dispatch'イベントでの手動実行時は常に実行
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "run-job=true" >> $GITHUB_OUTPUT
-          else
+            echo "run-job=true" >> $GITHUB_ENV
+            
             # mainブランチの直前のコミットと現在のコミットの間で変更をチェック
             MAIN_BEFORE_LAST_COMMIT=$(git rev-parse origin/main^)
             CURRENT_COMMIT=$(git rev-parse HEAD)
           
             if [ "${{ github.event.workflow_run.conclusion }}" = "success" ] && \
                git diff --name-only $MAIN_BEFORE_LAST_COMMIT $CURRENT_COMMIT | grep -qE 'infra/'; then
-              echo "run-job=true" >> $GITHUB_OUTPUT
+              echo "run-job=true" >> $GITHUB_ENV
             else
-              echo "run-job=false" >> $GITHUB_OUTPUT
-            fi
+              echo "run-job=false" >> $GITHUB_ENV
           fi
 
       - name: Deploy App
