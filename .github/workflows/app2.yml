@@ -38,6 +38,6 @@ jobs:
           fi
 
       - name: Deploy App
-        if: env.CHANGES_DETECTED == 'true'
+        if: env.run-job == 'true'
         run: |
           echo "Deploying Infra"
