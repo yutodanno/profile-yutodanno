@@ -19,30 +19,22 @@ jobs:
           fetch-depth: 0
 
       - name: Determine if workflow should run
-        id: should_run
+        id: determine_run_job
         run: |
-          # 'workflow_dispatch'イベントか'Infra Workflow'が成功した場合にのみ実行
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ github.event.workflow_run.conclusion }}" = "success" ]; then
-            echo "Workflow should run."
-            echo "SHOULD_RUN=true" >> $GITHUB_ENV
+          # 'workflow_dispatch'イベントでの手動実行時は常に実行
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "run-job=true" >> $GITHUB_OUTPUT
           else
-            echo "Workflow should not run."
-            echo "SHOULD_RUN=false" >> $GITHUB_ENV
-          fi
-
-      - name: Check for changes in 'infra/' path
-        if: env.SHOULD_RUN == 'true'
-        run: |
-          # mainブランチの直前のコミットと現在のコミットの間で変更をチェック
-          MAIN_BEFORE_LAST_COMMIT=$(git rev-parse origin/main^)
-          CURRENT_COMMIT=$(git rev-parse HEAD)
-
-          if git diff --name-only $MAIN_BEFORE_LAST_COMMIT $CURRENT_COMMIT | grep -qE 'infra/'; then
-            echo "Changes detected in 'infra/' path."
-            echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
-          else
-            echo "No changes detected in 'infra/' path."
-            echo "CHANGES_DETECTED=false" >> $GITHUB_ENV
+            # mainブランチの直前のコミットと現在のコミットの間で変更をチェック
+            MAIN_BEFORE_LAST_COMMIT=$(git rev-parse origin/main^)
+            CURRENT_COMMIT=$(git rev-parse HEAD)
+          
+            if [ "${{ github.event.workflow_run.conclusion }}" = "success" ] && \
+               git diff --name-only $MAIN_BEFORE_LAST_COMMIT $CURRENT_COMMIT | grep -qE 'infra/'; then
+              echo "run-job=true" >> $GITHUB_OUTPUT
+            else
+              echo "run-job=false" >> $GITHUB_OUTPUT
+            fi
           fi
 
       - name: Deploy App
